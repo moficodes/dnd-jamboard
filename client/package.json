@@ -4,6 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "clean": "rimraf dist",
+    "watch": "npm run clean && nodemon --watch src --exec \"npm run build\"",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
@@ -17,6 +19,8 @@
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
     "@vitejs/plugin-react-swc": "^3.0.0",
+    "nodemon": "^2.0.20",
+    "rimraf": "^4.1.2",
     "vite": "^4.1.0"
   }
 }

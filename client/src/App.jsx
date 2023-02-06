@@ -6,40 +6,41 @@ import './App.css';
 
 function App() {
   const [sounds, setSounds] = useState([]);
-  const [audios, setAudios] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
       const response = await fetch('/api/sounds');
       const data = await response.json();
-      setSounds(data);
       for (let i = 0; i < data.length; i++) {
-        const audio = new Audio(data[i].url);
-        audio.preload = 'auto';
-        audio.addEventListener('ended', () => {
-          const sound = sounds.find((sound) => sound.name === data[i].name);
-          sound.playing = false;
-          setSounds((prev) => prev.map(item => item.name === data[i].name ? sound : item));
-        });
-        setAudios((prev) => ({ ...prev, [data[i].name]: audio }));
+        data[i].playing = false;
+        data[i].pin = false;
+        data[i].loop = false;
       }
+      setSounds(data);
     }
-
     fetchData();
   }, []);
 
   const onControlClicked = (name) => {
-    const audio = audios[name];
     const sound = sounds.find((sound) => sound.name === name);
-
-    if (audio.playing) {
-      audio.pause();
-      audio.currentTime = 0;
-      audio.playing = false;
+    if (!sound.audio) {
+      const audio = new Audio(sound.url);
+      audio.preload = 'auto';
+      sound.audio = audio;
+      audio.addEventListener('ended', () => {
+        sound.playing = false;
+        setSounds((prev) => prev.map(item => item.name === name ? sound : item));
+      });
+      setSounds((prev) => prev.map(item => item.name === name ? sound : item));
+    }
+    if (sound.playing) {
+      sound.audio.pause();
+      sound.audio.currentTime = 0;
+      sound.audio.playing = false;
       sound.playing = false;
     } else {
-      audio.play();
-      audio.playing = true;
+      sound.audio.play();
+      sound.audio.playing = true;
       sound.playing = true;
     }
     setSounds((prev) => prev.map(item => item.name === name ? sound : item));
@@ -59,12 +60,10 @@ function App() {
     const sound = sounds.find((sound) => sound.name === name);
     if (sound.loop) {
       sound.loop = false;
-      audios[name].loop = false;
-      setAudios((prev) => ({ ...prev, [name]: audios[name] }));
+      sound.audio.loop = false;
     } else {
-      audios[name].loop = true;
+      sound.audio.loop = true;
       sound.loop = true;
-      setAudios((prev) => ({ ...prev, [name]: audios[name] }));
     }
     setSounds((prev) => prev.map(item => item.name === name ? sound : item));
   }
